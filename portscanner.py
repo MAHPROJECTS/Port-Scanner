@@ -1,5 +1,6 @@
 #pythons built in networking tool
 import socket
+import threading
 
 
 #creates dictionary of services
@@ -13,6 +14,8 @@ services = {
     443: "HTTPS",
     3306: "MySQL"
 }
+#mulitple threads running so place to save all results
+open_ports = []
 
 #ask sthe user for target IP and then that turns into the varibale taret192.168.1.109
 target = input("Enter target IP or hostname: ")
@@ -21,25 +24,44 @@ start_port = int(input("Start port: "))
 end_port = int(input("End port: "))
 
 
-print("\nScanning:", target)
-print("----------------------------")
-
-
-for port in range(start_port, end_port + 1):
+#crreates socket, gives timout, tests port , check if it workksed
+def scan_port(port):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    sock.settimeout(1)
+    sock.settimeout(0.2)
 
     result = sock.connect_ex((target, port))
 
-
     if result == 0:
+        print(f"Port {port}: OPEN")
 
-        service = services.get(port, "Unknown")
-
-        print(
-            f"Port {port}: OPEN ({service})"
-        )
+        open_ports.append(port)
 
     sock.close()
+
+
+
+#creates threads waits for them to finish and joins them
+threads = []
+
+for port in range(start_port, end_port + 1):
+
+    thread = threading.Thread(
+        target=scan_port,
+        args=(port,)
+    )
+
+    threads.append(thread)
+
+    thread.start()
+
+    for thread in threads:
+        thread.join()
+
+
+
+
+
+print("\nScanning:", target)
+print("----------------------------")
