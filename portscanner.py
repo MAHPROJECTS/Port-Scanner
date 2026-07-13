@@ -34,12 +34,46 @@ def scan_port(port):
     result = sock.connect_ex((target, port))
 
     if result == 0:
-        print(f"Port {port}: OPEN")
+
+        service = services.get(port, "Unknown")
+
+        banner = grab_banner(port)
+
+        print(f"\nPort {port}: OPEN")
+        print(f"Service: {service}")
+        print(f"Banner: {banner}")
 
         open_ports.append(port)
 
     sock.close()
 
+
+
+#connects sends requests recieves response
+
+def grab_banner(port):
+
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        sock.settimeout(1)
+
+        sock.connect((target, port))
+
+        # send a simple HTTP request
+        if port == 80 or port == 443:
+            sock.send(
+                b"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"
+            )
+
+        banner = sock.recv(1024)
+
+        sock.close()
+
+        return banner.decode(errors="ignore").strip()
+
+    except:
+        return "No banner"
 
 
 #creates threads waits for them to finish and joins them
