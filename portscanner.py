@@ -1,6 +1,26 @@
 #pythons built in networking tool
 import socket
 import threading
+#lets python talk to operating system
+import subprocess
+
+
+#prodding device
+def ping_device(ip):
+
+    result = subprocess.run(
+        #sending one ping
+        ["ping", "-n", "1", ip],
+        #hiding output
+        stdout=subprocess.DEVNULL
+    )
+    #checking success
+    if result.returncode == 0:
+        return True
+
+    else:
+        return False
+
 
 
 #creates dictionary of services
@@ -14,6 +34,19 @@ services = {
     443: "HTTPS",
     3306: "MySQL"
 }
+
+#ask for netwrok
+subnet = input("Enter subnet")
+
+#generate every ip on subnet
+for host in range(1, 255):
+
+    ip = f"{subnet}.{host}"
+
+    print(ip)
+
+
+
 #mulitple threads running so place to save all results
 open_ports = []
 
